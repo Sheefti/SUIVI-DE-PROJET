@@ -5,8 +5,8 @@ frontend/dist/
 frontend/build/
 
 # C# .NET
-backend/bin/
-backend/obj/
+backend/**/bin/
+backend/**/obj/
 backend/*.user
 backend/.vs/
 backend/appsettings.Development.json
