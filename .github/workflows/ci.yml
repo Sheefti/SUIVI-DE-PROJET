@@ -14,19 +14,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check if backend exists
+        id: check_backend
+        run: |
+          if [ -f "backend/*.csproj" ] || ls backend/*.sln 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup .NET
+        if: steps.check_backend.outputs.exists == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Restore dependencies
-        run: dotnet restore backend/
-
-      - name: Build
-        run: dotnet build backend/ --no-restore
+      - name: Restore & Build
+        if: steps.check_backend.outputs.exists == 'true'
+        run: |
+          dotnet restore backend/
+          dotnet build backend/ --no-restore
 
       - name: Test
+        if: steps.check_backend.outputs.exists == 'true'
         run: dotnet test backend/ --no-build --verbosity normal
+
+      - name: Skip (pas encore de code)
+        if: steps.check_backend.outputs.exists == 'false'
+        run: echo "⏭️ Backend pas encore initialisé, job ignoré."
 
   # ─── Microservice Python ──────────────────────────────
   microservice:
@@ -35,21 +50,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check if microservice exists
+        id: check_python
+        run: |
+          if [ -f "microservice-data/requirements.txt" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Python
+        if: steps.check_python.outputs.exists == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install & Lint & Test
+        if: steps.check_python.outputs.exists == 'true'
         run: |
           pip install -r microservice-data/requirements.txt
           pip install flake8 pytest
+          flake8 microservice-data/ --max-line-length=100
+          pytest microservice-data/
 
-      - name: Lint (flake8)
-        run: flake8 microservice-data/ --max-line-length=100
-
-      - name: Test
-        run: pytest microservice-data/
+      - name: Skip (pas encore de code)
+        if: steps.check_python.outputs.exists == 'false'
+        run: echo "⏭️ Microservice Python pas encore initialisé, job ignoré."
 
   # ─── Frontend React ───────────────────────────────────
   frontend:
@@ -58,13 +84,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check if frontend exists
+        id: check_frontend
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node
+        if: steps.check_frontend.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install dependencies
-        run: npm ci --prefix frontend
+      - name: Install & Build
+        if: steps.check_frontend.outputs.exists == 'true'
+        run: |
+          npm ci --prefix frontend
+          npm run build --prefix frontend
 
-      - name: Build
-        run: npm run build --prefix frontend
+      - name: Skip (pas encore de code)
+        if: steps.check_frontend.outputs.exists == 'false'
+        run: echo "⏭️ Frontend pas encore initialisé, job ignoré."
