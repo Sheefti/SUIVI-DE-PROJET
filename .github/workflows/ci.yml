@@ -1,0 +1,70 @@
+name: CI - Ymmo
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  # ─── Backend C# ───────────────────────────────────────
+  backend:
+    name: Build & Test Backend C#
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore backend/
+
+      - name: Build
+        run: dotnet build backend/ --no-restore
+
+      - name: Test
+        run: dotnet test backend/ --no-build --verbosity normal
+
+  # ─── Microservice Python ──────────────────────────────
+  microservice:
+    name: Lint & Test Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r microservice-data/requirements.txt
+          pip install flake8 pytest
+
+      - name: Lint (flake8)
+        run: flake8 microservice-data/ --max-line-length=100
+
+      - name: Test
+        run: pytest microservice-data/
+
+  # ─── Frontend React ───────────────────────────────────
+  frontend:
+    name: Build Frontend React
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci --prefix frontend
+
+      - name: Build
+        run: npm run build --prefix frontend
