@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "9Q6/mf3JcJw=",
+  "success": true,
+  "projectFilePath": "C:\\COURS\\B2\\SUIVI DE PROJET\\PROJET\\SUIVI-DE-PROJET\\backend\\Ymmo.API\\Ymmo.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\sheef\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.5\\microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512",
+    "C:\\Users\\sheef\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
